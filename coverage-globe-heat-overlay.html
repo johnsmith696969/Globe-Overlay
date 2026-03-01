@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Coverage Globe (Heat Overlay)</title>
+  <link href="https://cdn.jsdelivr.net/npm/cesium@latest/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%; height: 520px; margin: 0; padding: 0; overflow: hidden;
+      border-radius: 16px;
+    }
+    .cover {
+      position:absolute; inset:auto 12px 12px 12px;
+      padding:10px 12px; font: 14px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: rgba(0,0,0,.45); color: #fff; border-radius: 12px;
+      backdrop-filter: blur(6px);
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <div class="cover">Coverage visualization (density overlay; no pin locations). Drag to rotate. Zoom disabled.</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cesium@latest/Build/Cesium/Cesium.js"></script>
+  <script>
+    // Recommended: set your Cesium ion token for consistent basemap/terrain
+    // Cesium.Ion.defaultAccessToken = "PASTE_YOUR_CESIUM_ION_TOKEN_HERE";
+
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      timeline: false,
+      animation: false,
+      geocoder: false,
+      homeButton: false,
+      sceneModePicker: false,
+      baseLayerPicker: false,
+      navigationHelpButton: false,
+      fullscreenButton: false,
+      infoBox: false,
+      selectionIndicator: false,
+      shouldAnimate: false
+    });
+
+    // Disable zoom interactions
+    const c = viewer.scene.screenSpaceCameraController;
+    c.enableZoom = false;
+    c.enableTilt = true;
+    c.enableLook = true;
+    c.enableRotate = true;
+    c.enableTranslate = false;
+
+    // Add the heat overlay (single global image). Host this PNG on your site.
+    const heatUrl = "REPLACE_WITH_HOSTED_HEAT_PNG_URL";
+
+    // Remove default base layer if you want a cleaner look:
+    // viewer.imageryLayers.remove(viewer.imageryLayers.get(0), false);
+
+    const provider = new Cesium.SingleTileImageryProvider({
+      url: heatUrl,
+      rectangle: Cesium.Rectangle.fromDegrees(-180, -90, 180, 90)
+    });
+
+    const layer = viewer.imageryLayers.addImageryProvider(provider);
+    layer.alpha = 0.85;
+
+    // Frame the globe to a nice view of North America initially
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(-98, 39, 18000000.0),
+      duration: 1.4
+    });
+
+    document.getElementById("cesiumContainer").addEventListener("contextmenu", e => e.preventDefault());
+  </script>
+</body>
+</html>
